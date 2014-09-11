@@ -2,9 +2,10 @@ use strict;
 use warnings;
 package Mojolicious::Plugin::Neo4p;
 {
-  $Mojolicious::Plugin::Neo4p::VERSION = '0.01';
+  $Mojolicious::Plugin::Neo4p::VERSION = '0.005';
 }
 use Mojo::Base 'Mojolicious::Plugin';
+use REST::Neo4p;
 
 =head1 NAME
 
@@ -12,7 +13,7 @@ Mojolicious::Plugin::Neo4p - An initial attempt to integrate REST::Neo4p with Mo
 
 =head1 VERSION
 
-version 0.01
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -24,15 +25,10 @@ An initial attempt to integrate REST::Neo4p with Mojolicious
         my $self = shift;
 
         $self->plugin('neo4p', { 
-            derp => derp
+            api => '127.0.0.1:7474'
         });
 
     }
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
@@ -45,14 +41,14 @@ sub bind {
     my $app  = shift;
     my $conf = shift;
 
-    die ref($self), ': missing dsn parameter', "\n" unless($conf->{dsn});
+    die ref($self), ': missing api parameter', "\n" unless($conf->{api});
+	REST::Neo4p->connect($conf->{api});
 
-    my $dbh_connect = sub { DBI->connect($conf->{dsn}, $conf->{username}, $conf->{password}, $conf->{options}) };
+	warn "bound neo4p plugin to $app application\n";
 
-    $app->attr('dbh' => $dbh_connect);
-
-    my $helper_name = $conf->{helper} || 'db';
-    $app->helper($helper_name => sub { return shift->app->dbh });
+    $app->attr( neo4p => sub { REST::Neo4p->connect($conf->{api}) } );
+    $app->helper( neo4p => sub { return shift->app->neo4p } );
+	
 }
 
 sub register {
