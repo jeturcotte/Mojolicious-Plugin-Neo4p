@@ -19,7 +19,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Mojolicious' => 5.0,
-        #'Foo::Bar::Module' => 5.0401,
+        'REST::Neo4p' => 0.120
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Mojolicious-Plugin-Neo4p-*' },

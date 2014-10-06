@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Mojolicious::Plugin::Neo4p;
 {
-  $Mojolicious::Plugin::Neo4p::VERSION = '0.005';
+  $Mojolicious::Plugin::Neo4p::VERSION = '0.006';
 }
 use Mojo::Base 'Mojolicious::Plugin';
 use REST::Neo4p;
@@ -36,6 +36,10 @@ An initial attempt to integrate REST::Neo4p with Mojolicious
 
 =cut
 
+sub index { return 'REST::Neo4p::Index'; }
+sub node { return 'REST::Neo4p::Node'; }
+sub query { return 'REST::Neo4p::Query'; }
+
 sub bind {
     my $self = shift;
     my $app  = shift;
@@ -48,7 +52,6 @@ sub bind {
 
     $app->attr( neo4p => sub { REST::Neo4p->connect($conf->{api}) } );
     $app->helper( neo4p => sub { return shift->app->neo4p } );
-	
 }
 
 sub register {
