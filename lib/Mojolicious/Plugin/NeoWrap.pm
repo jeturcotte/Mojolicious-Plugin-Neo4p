@@ -1,66 +1,56 @@
 use strict;
 use warnings;
+package Mojolicious::Plugin::NeoWrap;
+{
+  $Mojolicious::Plugin::NeoWrap::VERSION = '0.11';
+}
+use parent 'REST::Neo4p';
 
 =head1 NAME
 
-Mojolicious::Plugin::Neo4p - An uncreative attempt to integrate REST::Neo4p with Mojolicious
+Mojolicious::Plugin::NeoWrap - In support of plugin integration, this module wraps the various functionalities into a single entity
 
 =head1 VERSION
 
-version 0.012
+version 0.11
 
 =head1 SYNOPSIS
 
-An initial attempt to integrate REST::Neo4p with Mojolicious
+In support of plugin integration, this module wraps the various functionalities into a single entity.
 
-    use Mojolicious::Plugin::Database;
+	sub bind {
+    	my $self = shift;
+    	my $app  = shift;
+    	my $conf = shift;
 
-    sub startup {
-        my $self = shift;
+    	die ref($self), ': missing api parameter', "\n" unless($conf->{api});
+		Mojolicious::Plugin::NeoWrap->connect($conf->{api});
+    	$app->helper( neo4p => Mojolicious::Plugin::NeoWrap );
+	}
 
-        $self->plugin('neo4p', { 
-            api => '127.0.0.1:7474'
-        });
+The end purpose is to have all the native functionality of REST::Neo4p available under a single object.  Following the above, one should be able to register the Neo4p plugin with their mojo install, and from there on out we should have a constrained syntax:
 
-    }
+	sub addguy {
+		my $self = shift;
+
+		$self->app->neo4p->connect('http://127.0.0.1:7474');
+		my $index = $self->app->neo4p->index->new('node','coolindex');
+		$index->add_entry(
+			$self->app->neo4p->node->new({
+				name => 'testman testburger',
+				age => '44',
+				gender => 'cheese'
+			}), guy => 'testman testburger'
+		);
+	}
 
 =cut
 
-package NeoWrap
-{
-  $NeoWrap::VERSION = '0.11';
-  use parent 'REST::Neo4p';
-  sub index { return 'REST::Neo4p::Index' }
-  sub node { return 'REST::Neo4p::Node' }
-  sub query { return 'REST::Neo4p::Query' }
-}
 
-package Mojolicious::Plugin::Neo4p;
-{
-  $Mojolicious::Plugin::Neo4p::VERSION = '0.012';
-  use Mojo::Base 'Mojolicious::Plugin';
-  
-  sub single_source {
-    my $self = shift;
-    my $app  = shift;
-    my $conf = shift;
+sub index { return 'REST::Neo4p::Index' }
+sub node { return 'REST::Neo4p::Node' }
+sub query { return 'REST::Neo4p::Query' }
 
-    die ref($self), ': missing api parameter', "\n" unless ($conf->{ip} && $conf->{port});
-	
-  	my $graph_connection = sub { NeoWrap->connect("$conf->{ip}:$conf->{port}") };
-  	$app->attr('graph_connection' => $graph_connection );
-  	my $helper_name = $conf->{helper} || 'neo4p';
-  	$app->helper($helper_name => sub { return shift->app->graph_connection });
-  }
-
-  sub register {
-    my $self = shift;
-    my $app  = shift;
-    my $conf = shift || {};
-  	$self->single_source($app, $conf);
-  }
-  
-}
 
 =head1 AUTHOR
 
@@ -76,7 +66,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Mojolicious::Plugin::Neo4p
+    perldoc Mojolicious::Plugin::NeoWrap
 
 
 You can also look for information at:
@@ -85,19 +75,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker (report bugs here)
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Mojolicious-Plugin-Neo4p>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Mojolicious-Plugin-NeoWrap>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Mojolicious-Plugin-Neo4p>
+L<http://annocpan.org/dist/Mojolicious-Plugin-NeoWrap>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Mojolicious-Plugin-Neo4p>
+L<http://cpanratings.perl.org/d/Mojolicious-Plugin-NeoWrap>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Mojolicious-Plugin-Neo4p/>
+L<http://search.cpan.org/dist/Mojolicious-Plugin-NeoWrap/>
 
 =back
 
